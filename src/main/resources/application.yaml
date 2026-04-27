@@ -7,70 +7,70 @@ spring:
     gateway:
       server:
         webflux:
+          default-filters:
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET
+                statuses: INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
           routes:
             - id: user-service
               uri: lb://user-service
               predicates:
-                - Path=/users/**
-              filters:
-                - StripPrefix=1
+                - Path=/users/**, /auth/**
 
             - id: record-service
               uri: lb://record-service
               predicates:
                 - Path=/records/**
-              filters:
-                - StripPrefix=1
 
             - id: notification-service
               uri: lb://notification-service
               predicates:
                 - Path=/notifications/**
-              filters:
-                - StripPrefix=1
 
             - id: payment-service
               uri: lb://payment-service
               predicates:
                 - Path=/payments/**
-              filters:
-                - StripPrefix=1
 
             - id: place-service
               uri: lb://place-service
               predicates:
                 - Path=/places/**
-              filters:
-                - StripPrefix=1
 
             - id: order-service
               uri: lb://order-service
               predicates:
                 - Path=/orders/**
-              filters:
-                - StripPrefix=1
 
             - id: matching-service
               uri: lb://matching-service
               predicates:
                 - Path=/matchings/**
-              filters:
-                - StripPrefix=1
 
             - id: plan-service
               uri: lb://plan-service
               predicates:
                 - Path=/plans/**
-              filters:
-                - StripPrefix=1
 
             - id: company-service
               uri: lb://company-service
               predicates:
                 - Path=/companies/**
-              filters:
-                - StripPrefix=1
 
+# whitelist
+gateway:
+  whitelist:
+    - /users/signup
+    - /auth/login
+    - /auth/refresh
+
+# jwt
 jwt:
   secret: ${JWT_SECRET}
 
