@@ -71,6 +71,14 @@ spring:
               filters:
                 - StripPrefix=1
 
+# whitelist
+gateway:
+  whitelist:
+    - /users/signup
+    - /auth/login
+    - /auth/refresh
+
+# jwt
 jwt:
   secret: ${JWT_SECRET}
 
