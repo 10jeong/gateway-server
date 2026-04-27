@@ -19,6 +19,9 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
+    private static final String HEADER_USER_ID = "X-User-Id";
+    private static final String HEADER_USER_ROLE = "X-User-Role";
+
     private final GatewayProperties gatewayProperties;
     private final JwtProvider jwtProvider;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -26,10 +29,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-
         List<String> whitelist = gatewayProperties.getWhitelist();
-        if(whitelist.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, path))){
+
+        if(isPublicPath(whitelist, path)){
             return chain.filter(exchange);
         }
 
@@ -47,8 +49,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String role = jwtProvider.getRole(token);
 
         ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(r -> r.header("X-User-Id", userId)
-                        .header("X-User-Role", role))
+                .request(r -> r.header(HEADER_USER_ID, userId)
+                        .header(HEADER_USER_ROLE, role))
                 .build();
 
         return chain.filter(mutatedExchange);
@@ -57,5 +59,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return -1;
+    }
+
+    // helper method
+    private boolean isPublicPath(List<String> whitelist, String path) {
+        return whitelist.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 }
