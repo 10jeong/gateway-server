@@ -31,10 +31,16 @@ public class JwtProvider {
 
     public boolean validateToken(String token) {
         try {
+            Claims claims = getClaims(token);
+
+            if (claims == null) {
+                return false;
+            }
+
             Jwts.parser()
-                    .verifyWith(signingKey)
-                    .build()
-                    .parseSignedClaims(token);
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token);
             return true;
         } catch (Exception e) {
             log.warn("[JwtProvider] 토큰 검증 실패: {}", e.getMessage());
@@ -54,8 +60,8 @@ public class JwtProvider {
 
     public String resolveToken(ServerWebExchange exchange) {
         String bearer = exchange.getRequest()
-                .getHeaders()
-                .getFirst(HttpHeaders.AUTHORIZATION);
+            .getHeaders()
+            .getFirst(HttpHeaders.AUTHORIZATION);
 
         if (bearer == null || !bearer.startsWith("Bearer ")) {
             return null;
@@ -65,11 +71,11 @@ public class JwtProvider {
     }
 
     // helper method
-    private Claims getClaims(String token){
+    private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(signingKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+            .verifyWith(signingKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
     }
 }
