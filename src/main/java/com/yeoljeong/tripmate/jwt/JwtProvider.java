@@ -61,7 +61,8 @@ public class JwtProvider {
             .getHeaders()
             .getFirst(HttpHeaders.AUTHORIZATION);
 
-        if (bearer == null || !bearer.startsWith("Bearer ")) {
+        // 대소문자 구분없이 비교하기 위해 regionMatches 사용
+        if (bearer == null || !bearer.regionMatches(true, 0, "Bearer ", 0, 7)) {
             return null;
         }
 
