@@ -33,14 +33,12 @@ public class JwtProvider {
         try {
             Claims claims = getClaims(token);
 
-            if (claims == null) {
-                return false;
-            }
+            String subject = claims.getSubject();
+            String role = claims.get("role", String.class);
 
-            Jwts.parser()
-                .verifyWith(signingKey)
-                .build()
-                .parseSignedClaims(token);
+            if(subject == null || subject.isBlank()) return false;
+            if(role == null || role.isBlank()) return false;
+
             return true;
         } catch (Exception e) {
             log.warn("[JwtProvider] 토큰 검증 실패: {}", e.getMessage());
