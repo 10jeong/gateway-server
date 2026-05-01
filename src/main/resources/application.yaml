@@ -66,7 +66,8 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:https://dolphin-device-evident.ngrok-free.dev/eureka}
+#      defaultZone: ${EUREKA_SERVER_URL:https://dolphin-device-evident.ngrok-free.dev/eureka}
+       defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
 
