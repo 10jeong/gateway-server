@@ -1,6 +1,6 @@
 package com.yeoljeong.tripmate.filter;
 
-import com.yeoljeong.tripmate.exception.constants.CommonErrorCode;
+import com.yeoljeong.tripmate.error.GatewayErrorCode;
 import com.yeoljeong.tripmate.response.GatewayResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -21,7 +21,7 @@ public class InternalPathFilter implements GlobalFilter, Ordered {
 
         if (isInternal) {
             log.warn("[Gateway] internal 경로 차단: {}", path);
-            return GatewayResponseUtil.writeErrorResponse(exchange, CommonErrorCode.FORBIDDEN);
+            return GatewayResponseUtil.writeErrorResponse(exchange, GatewayErrorCode.FORBIDDEN);
         }
         return chain.filter(exchange);
     }
