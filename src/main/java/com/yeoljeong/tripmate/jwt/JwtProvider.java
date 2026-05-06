@@ -1,12 +1,9 @@
 package com.yeoljeong.tripmate.jwt;
 
-import com.yeoljeong.tripmate.exception.constants.CommonErrorCode;
-import com.yeoljeong.tripmate.response.GatewayResponseUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;

@@ -30,7 +30,7 @@ spring:
             - id: record-service
               uri: lb://record-service
               predicates:
-                - Path=/records/**
+                - Path=/feeds/**
             - id: notification-service
               uri: lb://notification-service
               predicates:
@@ -50,7 +50,7 @@ spring:
             - id: matching-service
               uri: lb://matching-service
               predicates:
-                - Path=/matching/**, /user-settings
+                - Path=/matching/**, /user-settings/**
             - id: plan-service
               uri: lb://plan-service
               predicates:
@@ -70,6 +70,16 @@ eureka:
        defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: ${EUREKA_SERVER_URL:https://dolphin-device-evident.ngrok-free.dev/eureka}
+#      #defaultZone: http://localhost:8761/eureka
+#  instance:
+#    hostname: pelvis-pounce-attempt.ngrok-free.dev
+#    non-secure-port: 80
+#    prefer-ip-address: false
 
 gateway:
   whitelist:
