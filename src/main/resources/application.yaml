@@ -90,3 +90,4 @@ gateway:
 
 jwt:
   secret: ${JWT_SECRET}
+  internal-secret: ${JWT_INTERNAL_SECRET}
