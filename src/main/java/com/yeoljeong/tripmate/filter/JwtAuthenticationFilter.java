@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         ServerWebExchange mutatedExchange = exchange.mutate()
             .request(r -> r
-                .headers(headers -> headers.remove("X-Passport")) // 기존 헤더 제거
+                .headers(headers -> headers.remove(HEADER_PASSPORT)) // 기존 헤더 제거
                 .header(HEADER_PASSPORT, passport))
             .build();
 
