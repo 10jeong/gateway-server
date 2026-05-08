@@ -49,15 +49,23 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         String userId = jwtProvider.getUserId(token);
         String role = jwtProvider.getRole(token);
-        String passport = passportProvider.issue(userId, role);
 
-        ServerWebExchange mutatedExchange = exchange.mutate()
-            .request(r -> r
-                .headers(headers -> headers.remove(HEADER_PASSPORT)) // 기존 헤더 제거
-                .header(HEADER_PASSPORT, passport))
-            .build();
+        // issue에서 예외 발생시 Mono파이프라인 밖에서 500에러가 발생할 것을 방어
+        try {
+            String passport = passportProvider.issue(userId, role);
 
-        return chain.filter(mutatedExchange);
+            ServerWebExchange mutatedExchange = exchange.mutate()
+                .request(r -> r
+                    .headers(headers -> headers.remove(HEADER_PASSPORT))
+                    .header(HEADER_PASSPORT, passport))
+                .build();
+
+            return chain.filter(mutatedExchange);
+
+        } catch (Exception e) {
+            log.error("[Passport] 발급 실패 - userId: {}, error: {}", userId, e.getMessage());
+            return GatewayResponseUtil.writeErrorResponse(exchange, GatewayErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
