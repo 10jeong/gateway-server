@@ -6,6 +6,10 @@ spring:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   cloud:
     compatibility-verifier:
       enabled: false
@@ -13,6 +17,11 @@ spring:
       server:
         webflux:
           default-filters:
+            - RemoveRequestHeader=X-Forwarded-For
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Forwarded-Proto
+            - RemoveRequestHeader=X-Forwarded-Port
+            - RemoveRequestHeader=X-Forwarded-Prefix
             - name: Retry
               args:
                 retries: 3
@@ -59,27 +68,28 @@ spring:
               uri: lb://company-service
               predicates:
                 - Path=/companies/**, /products/**
+          httpclient:
+            max-header-size: 65536
 
 server:
   port: 8080
+  netty:
+    max-initial-line-length: 65536
+    max-header-size: 65536
 
 eureka:
   client:
     service-url:
 #      defaultZone: ${EUREKA_SERVER_URL:https://dolphin-device-evident.ngrok-free.dev/eureka}
-       defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+#  instance:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
-
-#eureka:
-#  client:
-#    service-url:
-#      defaultZone: ${EUREKA_SERVER_URL:https://dolphin-device-evident.ngrok-free.dev/eureka}
-#      #defaultZone: http://localhost:8761/eureka
-#  instance:
-#    hostname: pelvis-pounce-attempt.ngrok-free.dev
-#    non-secure-port: 80
-#    prefer-ip-address: false
+    hostname: pelvis-pounce-attempt.ngrok-free.dev
+    non-secure-port: 80
+    secure-port: 443
+    prefer-ip-address: false
+    secure-port-enabled: false
 
 gateway:
   whitelist:
@@ -91,3 +101,8 @@ gateway:
 jwt:
   secret: ${JWT_SECRET}
   internal-secret: ${JWT_INTERNAL_SECRET}
+
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: DEBUG
+#    reactor.netty.http.client: DEBUG
