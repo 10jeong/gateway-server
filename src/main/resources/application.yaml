@@ -89,7 +89,7 @@ eureka:
     non-secure-port: 80
     secure-port: 443
     prefer-ip-address: false
-    secure-port-enabled: true
+    secure-port-enabled: false
 
 gateway:
   whitelist:
