@@ -48,22 +48,23 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                sh """
-                    ssh -i ${PEM_PATH} -o StrictHostKeyChecking=no ec2-user@${USER_EC2_IP} '
-                        docker pull ${DOCKER_IMAGE}:${DOCKER_TAG}
-                        docker stop gateway-service || true
-                        docker rm gateway-service || true
-                        docker run -d \\
-                            --name gateway-service \\
-                            --env-file /home/ec2-user/.env \\
-                            -p 8080:8080 \\
-                            ${DOCKER_IMAGE}:${DOCKER_TAG}
-                    '
-                """
-            }
-        }
+      stage('Deploy') {
+          steps {
+              sh """
+                  ssh -i ${PEM_PATH} -o StrictHostKeyChecking=no ec2-user@${USER_EC2_IP} '
+                      docker pull ${DOCKER_IMAGE}:${DOCKER_TAG}
+                      docker stop gateway-service || true
+                      docker rm gateway-service || true
+                      docker run -d \\
+                          --name gateway-service \\
+                          --env-file /home/ec2-user/.env \\
+                          -e SPRING_PROFILES_ACTIVE=prod \\
+                          -p 8080:8080 \\
+                          ${DOCKER_IMAGE}:${DOCKER_TAG}
+                  '
+              """
+          }
+      }
     }
 
     post {
