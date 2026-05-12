@@ -1,10 +1,9 @@
 package com.yeoljeong.tripmate.response;
 
 import com.yeoljeong.tripmate.error.GatewayErrorCode;
+import java.nio.charset.StandardCharsets;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import java.nio.charset.StandardCharsets;
 
 public class GatewayResponseUtil {
 
