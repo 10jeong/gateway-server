@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
@@ -26,6 +27,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private final GatewayProperties gatewayProperties;
     private final JwtProvider jwtProvider;
     private final PassportProvider passportProvider;
+    private final ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
@@ -50,22 +52,32 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String userId = jwtProvider.getUserId(token);
         String role = jwtProvider.getRole(token);
 
-        // issue에서 예외 발생시 Mono파이프라인 밖에서 500에러가 발생할 것을 방어
-        try {
-            String passport = passportProvider.issue(userId, role);
+        return reactiveRedisTemplate.hasKey("BL:" + userId)
+            .flatMap(isBlackListed -> {
+                if (Boolean.TRUE.equals(isBlackListed)) {
+                    // 블랙리스트에 있으면 401
+                    return GatewayResponseUtil.writeErrorResponse(exchange,
+                        GatewayErrorCode.UNAUTHORIZED);
+                }
 
-            ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(r -> r
-                    .headers(headers -> headers.remove(HEADER_PASSPORT))
-                    .header(HEADER_PASSPORT, passport))
-                .build();
+                // issue에서 예외 발생시 Mono파이프라인 밖에서 500에러가 발생할 것을 방어
+                try {
+                    String passport = passportProvider.issue(userId, role);
 
-            return chain.filter(mutatedExchange);
+                    ServerWebExchange mutatedExchange = exchange.mutate()
+                        .request(r -> r
+                            .headers(headers -> headers.remove(HEADER_PASSPORT))
+                            .header(HEADER_PASSPORT, passport))
+                        .build();
 
-        } catch (Exception e) {
-            log.error("[Passport] 발급 실패 - userId: {}, error: {}", userId, e.getMessage());
-            return GatewayResponseUtil.writeErrorResponse(exchange, GatewayErrorCode.INTERNAL_SERVER_ERROR);
-        }
+                    return chain.filter(mutatedExchange);
+
+                } catch (Exception e) {
+                    log.error("[Passport] 발급 실패 - userId: {}, error: {}", userId, e.getMessage());
+                    return GatewayResponseUtil.writeErrorResponse(exchange,
+                        GatewayErrorCode.INTERNAL_SERVER_ERROR);
+                }
+            });
     }
 
     @Override

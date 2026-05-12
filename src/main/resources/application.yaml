@@ -97,6 +97,10 @@ gateway:
     - /auth/login
     - /auth/refresh
     - /internal/**
+    - /**/actuator/**
+    - /payments/toss-test-payment.html
+    - /payments/success
+    - /payments/fail
 
 jwt:
   secret: ${JWT_SECRET}
