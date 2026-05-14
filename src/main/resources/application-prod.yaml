@@ -33,7 +33,7 @@ spring:
             - id: order-service
               uri: lb://order-service
               predicates:
-                - Path=/orders/**
+                - Path=/orders/**, /internal/orders/** #테스트
             - id: matching-service
               uri: lb://matching-service
               predicates:
@@ -41,11 +41,11 @@ spring:
             - id: plan-service
               uri: lb://plan-service
               predicates:
-                - Path=/plans/**
+                - Path=/plans/**, /internal/plan/** #테스트
             - id: company-service
               uri: lb://company-service
               predicates:
-                - Path=/companies/**, /products/**
+                - Path=/companies/**, /products/**, /internal/products/** #테스트
 server:
   port: ${SERVER_PORT:8080}
 
