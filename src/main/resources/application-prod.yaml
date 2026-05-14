@@ -13,7 +13,7 @@ spring:
             - id: user-service
               uri: lb://user-service
               predicates:
-                - Path=/users/**, /auth/**
+                - Path=/users/**, /auth/**, /internal/users/** #테스트
             - id: record-service
               uri: lb://record-service
               predicates:
